@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.idea
+.vscode
+*.iml
+docs
+**/target
+**/*.log
+saas-wq-web/node_modules
+saas-wq-web/dist
+saas-wq-web/.env.local
+README.md

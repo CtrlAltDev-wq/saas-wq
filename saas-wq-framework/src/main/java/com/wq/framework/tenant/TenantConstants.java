@@ -24,7 +24,8 @@ public final class TenantConstants {
     /**
      * Tables that are global by design and must never be filtered by tenant.
      */
-    private static final Set<String> IGNORED_TABLES = Set.of("sys_tenant", "flyway_schema_history");
+    private static final Set<String> IGNORED_TABLES = Set.of("sys_tenant", "sys_role", "sys_permission",
+            "sys_role_permission", "flyway_schema_history");
 
     private TenantConstants() {
     }

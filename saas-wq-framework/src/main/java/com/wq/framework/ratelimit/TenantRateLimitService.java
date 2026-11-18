@@ -1,5 +1,6 @@
 package com.wq.framework.ratelimit;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Instant;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +34,13 @@ public class TenantRateLimitService {
 
     private final DefaultRedisScript<Long> script;
 
-    public TenantRateLimitService(StringRedisTemplate redisTemplate, RateLimitProperties properties) {
+    private final MeterRegistry meterRegistry;
+
+    public TenantRateLimitService(StringRedisTemplate redisTemplate, RateLimitProperties properties,
+                                  MeterRegistry meterRegistry) {
         this.redisTemplate = redisTemplate;
         this.properties = properties;
+        this.meterRegistry = meterRegistry;
         DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
         redisScript.setLocation(new ClassPathResource("lua/tenant_rate_limit.lua"));
         redisScript.setResultType(Long.class);
@@ -59,11 +64,13 @@ public class TenantRateLimitService {
             Long used = redisTemplate.execute(script, List.of(key), Long.toString(COUNTER_TTL_SECONDS));
             if (used == null) {
                 log.warn("Rate limiter returned no counter for tenant {}, request allowed", tenantId);
+                meterRegistry.counter("saaswq.rate.limit.failopen").increment();
                 return RateLimitResult.failOpen(limit, resetAt);
             }
             return RateLimitResult.of(used <= limit, limit, used, retryAfter, resetAt);
         } catch (DataAccessException exception) {
             log.warn("Rate limiter unavailable for tenant {}, request allowed: {}", tenantId, exception.getMessage());
+            meterRegistry.counter("saaswq.rate.limit.failopen").increment();
             return RateLimitResult.failOpen(limit, resetAt);
         }
     }

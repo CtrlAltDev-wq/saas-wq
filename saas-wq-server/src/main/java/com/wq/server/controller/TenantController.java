@@ -2,6 +2,7 @@ package com.wq.server.controller;
 
 import com.wq.common.api.PageResult;
 import com.wq.common.api.Result;
+import com.wq.framework.audit.Audit;
 import com.wq.server.dto.TenantCreateRequest;
 import com.wq.server.dto.TenantUpdateRequest;
 import com.wq.server.service.TenantService;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/tenants")
-@PreAuthorize("hasRole('SUPER_ADMIN')")
+@PreAuthorize("hasAuthority('tenant:read')")
 @RequiredArgsConstructor
 public class TenantController {
 
@@ -74,6 +75,8 @@ public class TenantController {
      * @return created tenant
      */
     @Operation(summary = "Create a tenant")
+    @PreAuthorize("hasAuthority('tenant:write')")
+    @Audit(action = "TENANT_CREATE", resource = "TENANT")
     @PostMapping
     public Result<TenantVO> create(@Valid @RequestBody TenantCreateRequest request) {
         return Result.success(tenantService.create(request));
@@ -87,6 +90,8 @@ public class TenantController {
      * @return updated tenant
      */
     @Operation(summary = "Update a tenant")
+    @PreAuthorize("hasAuthority('tenant:write')")
+    @Audit(action = "TENANT_UPDATE", resource = "TENANT")
     @PutMapping("/{id}")
     public Result<TenantVO> update(@PathVariable Long id, @Valid @RequestBody TenantUpdateRequest request) {
         return Result.success(tenantService.update(id, request));
@@ -99,6 +104,8 @@ public class TenantController {
      * @return empty success envelope
      */
     @Operation(summary = "Delete a tenant")
+    @PreAuthorize("hasAuthority('tenant:write')")
+    @Audit(action = "TENANT_DELETE", resource = "TENANT")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         tenantService.delete(id);

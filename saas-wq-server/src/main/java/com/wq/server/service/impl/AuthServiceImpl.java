@@ -20,6 +20,7 @@ import com.wq.server.service.AuthService;
 import com.wq.server.vo.LoginVO;
 import com.wq.server.vo.UserVO;
 import io.jsonwebtoken.JwtException;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
@@ -52,8 +53,21 @@ public class AuthServiceImpl implements AuthService {
 
     private final TokenBlacklistService tokenBlacklistService;
 
+    private final MeterRegistry meterRegistry;
+
     @Override
     public LoginVO login(LoginRequest request) {
+        try {
+            LoginVO loginVO = authenticate(request);
+            meterRegistry.counter("saaswq.auth.login", "outcome", "success").increment();
+            return loginVO;
+        } catch (BusinessException exception) {
+            meterRegistry.counter("saaswq.auth.login", "outcome", "failure").increment();
+            throw exception;
+        }
+    }
+
+    private LoginVO authenticate(LoginRequest request) {
         Tenant tenant = tenantMapper.selectOne(Wrappers.<Tenant>lambdaQuery()
                 .eq(Tenant::getCode, request.tenantCode()));
         if (tenant == null) {

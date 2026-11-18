@@ -90,3 +90,20 @@ logging:
   level:
     com.wq: info
     org.springframework.security: warn
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Metrics and health are consumed by the monitoring stack; restrict them at the
+        # network level before exposing the service to the internet.
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}

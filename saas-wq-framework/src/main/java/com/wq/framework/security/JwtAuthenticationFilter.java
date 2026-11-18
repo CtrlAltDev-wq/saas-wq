@@ -1,5 +1,6 @@
 package com.wq.framework.security;
 
+import com.wq.framework.logging.MdcContextFilter;
 import com.wq.framework.tenant.TenantContext;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -7,7 +8,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,12 +36,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
+    /**
+     * Optional permission resolver. When absent the principal only carries its role, which
+     * keeps the filter usable in isolated tests and in modules without a role registry.
+     */
+    private final PermissionLookup permissionLookup;
+
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
                                    TokenBlacklistService tokenBlacklistService,
-                                   JwtAuthenticationEntryPoint authenticationEntryPoint) {
+                                   JwtAuthenticationEntryPoint authenticationEntryPoint,
+                                   PermissionLookup permissionLookup) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.tokenBlacklistService = tokenBlacklistService;
         this.authenticationEntryPoint = authenticationEntryPoint;
+        this.permissionLookup = permissionLookup;
     }
 
     @Override
@@ -57,6 +68,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
                 authenticate(request, payload);
                 TenantContext.set(payload.principal().tenantId());
+                MDC.put(MdcContextFilter.TENANT_ID, String.valueOf(payload.principal().tenantId()));
+                MDC.put(MdcContextFilter.USER_ID, String.valueOf(payload.principal().userId()));
             } catch (JwtException | IllegalArgumentException exception) {
                 SecurityContextHolder.clearContext();
                 TenantContext.clear();
@@ -74,10 +87,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void authenticate(HttpServletRequest request, JwtPayload payload) {
         LoginUser principal = payload.principal();
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + principal.role()));
+        if (permissionLookup != null) {
+            permissionLookup.permissionsFor(principal.role())
+                    .forEach(code -> authorities.add(new SimpleGrantedAuthority(code)));
+        }
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 principal,
                 payload.tokenId(),
-                List.of(new SimpleGrantedAuthority("ROLE_" + principal.role())));
+                authorities);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

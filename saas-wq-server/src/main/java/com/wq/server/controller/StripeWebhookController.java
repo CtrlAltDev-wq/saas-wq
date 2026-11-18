@@ -10,6 +10,7 @@ import com.wq.server.payment.StripeEventDeduplicator;
 import com.wq.server.payment.StripeProperties;
 import com.wq.server.payment.StripeWebhookHandler;
 import com.wq.server.vo.WebhookAckVO;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class StripeWebhookController {
     private final StripeProperties properties;
     private final StripeEventDeduplicator deduplicator;
     private final StripeWebhookHandler webhookHandler;
+    private final MeterRegistry meterRegistry;
 
     /**
      * Validates the Stripe signature, then applies the event exactly once.
@@ -61,14 +63,17 @@ public class StripeWebhookController {
         Event event = verify(payload, signature);
         if (!deduplicator.register(event.getId())) {
             log.info("Duplicate Stripe event {} ignored", event.getId());
+            meterRegistry.counter("saaswq.webhook.events", "type", event.getType(), "outcome", "duplicate").increment();
             return Result.success(new WebhookAckVO(true, true));
         }
         try {
             webhookHandler.handle(event);
         } catch (RuntimeException exception) {
+            meterRegistry.counter("saaswq.webhook.events", "type", event.getType(), "outcome", "failed").increment();
             deduplicator.release(event.getId());
             throw exception;
         }
+        meterRegistry.counter("saaswq.webhook.events", "type", event.getType(), "outcome", "processed").increment();
         return Result.success(new WebhookAckVO(true, false));
     }
 

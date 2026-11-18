@@ -38,6 +38,59 @@ services:
       timeout: 5s
       retries: 10
 
+  saas-wq-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: saas-wq-server:latest
+    container_name: saas-wq-server
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SERVER_PORT: 8080
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-saas_wq}
+      DB_USER: ${DB_USER:-saas}
+      DB_PASSWORD: ${DB_PASSWORD:-saas123}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-saas-wq-local-development-secret-key-change-me}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-PT12H}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      RATE_LIMIT_REQUESTS_PER_MINUTE: ${RATE_LIMIT_REQUESTS_PER_MINUTE:-60}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:8080/billing/success?session_id={CHECKOUT_SESSION_ID}}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:8080/billing/cancel}
+      STRIPE_CURRENCY: ${STRIPE_CURRENCY:-usd}
+    ports:
+      - "${BACKEND_HOST_PORT:-8081}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:8080/actuator/health | grep -q '\"status\":\"UP\"'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  web:
+    build:
+      context: ./saas-wq-web
+      dockerfile: Dockerfile
+    image: saas-wq-web:latest
+    container_name: saas-wq-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_HOST_PORT:-8080}:80"
+    depends_on:
+      saas-wq-server:
+        condition: service_healthy
+
 volumes:
   mysql-data:
   redis-data:

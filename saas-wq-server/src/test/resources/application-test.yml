@@ -1,0 +1,14 @@
+spring:
+  main:
+    banner-mode: off
+
+logging:
+  level:
+    com.wq: warn
+    org.flywaydb: warn
+
+wq:
+  stripe:
+    # The suite never calls Stripe; empty keys keep the provider disabled.
+    secret-key: ""
+    webhook-secret: ""

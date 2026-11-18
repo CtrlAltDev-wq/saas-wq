@@ -16,6 +16,11 @@ target/
 logs/
 *.log
 
+# Frontend build output and dependencies
+node_modules/
+dist/
+*.local
+
 # Local environment
 .env
 

@@ -2,6 +2,7 @@ package com.wq.server.controller;
 
 import com.wq.common.api.PageResult;
 import com.wq.common.api.Result;
+import com.wq.framework.audit.Audit;
 import com.wq.server.dto.CheckoutRequest;
 import com.wq.server.service.OrderService;
 import com.wq.server.vo.CheckoutSessionVO;
@@ -29,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/orders")
-@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'TENANT_ADMIN', 'MEMBER')")
+@PreAuthorize("hasAuthority('order:read')")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -70,7 +71,8 @@ public class OrderController {
      * @return hosted checkout session
      */
     @Operation(summary = "Create a Stripe Checkout subscription session")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('order:write')")
+    @Audit(action = "ORDER_CHECKOUT", resource = "ORDER")
     @PostMapping("/checkout")
     public Result<CheckoutSessionVO> checkout(@Valid @RequestBody CheckoutRequest request) {
         return Result.success(orderService.checkout(request));

@@ -2,6 +2,7 @@ package com.wq.framework.security;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +41,12 @@ public class SecurityConfig {
     private final JwtAccessDeniedHandler accessDeniedHandler;
 
     /**
+     * Permission resolver contributed by the persistence module. Optional so that the
+     * security chain still starts in a module that has no role registry.
+     */
+    private final ObjectProvider<PermissionLookup> permissionLookupProvider;
+
+    /**
      * Declares the filter chain. The JWT filter is created inline instead of being a
      * component so that the servlet container does not register it a second time.
      *
@@ -50,14 +57,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(
-                jwtTokenProvider, tokenBlacklistService, authenticationEntryPoint);
+                jwtTokenProvider, tokenBlacklistService, authenticationEntryPoint,
+                permissionLookupProvider.getIfAvailable());
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login", "/api/stripe/webhook", "/v3/api-docs/**",
-                                "/swagger-ui/**", "/swagger-ui.html", "/actuator/health").permitAll()
+                                "/swagger-ui/**", "/swagger-ui.html", "/actuator/health/**", "/actuator/info",
+                                "/actuator/prometheus", "/actuator/metrics/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(authenticationEntryPoint)

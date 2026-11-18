@@ -1,6 +1,7 @@
 package com.wq.server.controller;
 
 import com.wq.common.api.Result;
+import com.wq.framework.audit.Audit;
 import com.wq.server.dto.LoginRequest;
 import com.wq.server.service.AuthService;
 import com.wq.server.vo.LoginVO;
@@ -35,6 +36,7 @@ public class AuthController {
      * @return access token and profile
      */
     @Operation(summary = "Login with tenant code, username and password")
+    @Audit(action = "AUTH_LOGIN", resource = "AUTH")
     @PostMapping("/login")
     public Result<LoginVO> login(@Valid @RequestBody LoginRequest request) {
         return Result.success(authService.login(request));
@@ -47,6 +49,7 @@ public class AuthController {
      * @return empty success envelope
      */
     @Operation(summary = "Logout and revoke the current access token")
+    @Audit(action = "AUTH_LOGOUT", resource = "AUTH")
     @PostMapping("/logout")
     public Result<Void> logout(
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader) {

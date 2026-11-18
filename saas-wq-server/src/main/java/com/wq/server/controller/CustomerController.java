@@ -2,6 +2,7 @@ package com.wq.server.controller;
 
 import com.wq.common.api.PageResult;
 import com.wq.common.api.Result;
+import com.wq.framework.audit.Audit;
 import com.wq.server.dto.CustomerCreateRequest;
 import com.wq.server.dto.CustomerUpdateRequest;
 import com.wq.server.service.CustomerService;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/customers")
-@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'TENANT_ADMIN', 'MEMBER')")
+@PreAuthorize("hasAuthority('customer:read')")
 @RequiredArgsConstructor
 public class CustomerController {
 
@@ -74,7 +75,8 @@ public class CustomerController {
      * @return created customer
      */
     @Operation(summary = "Create a customer in the current tenant")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('customer:write')")
+    @Audit(action = "CUSTOMER_CREATE", resource = "CUSTOMER")
     @PostMapping
     public Result<CustomerVO> create(@Valid @RequestBody CustomerCreateRequest request) {
         return Result.success(customerService.create(request));
@@ -88,7 +90,8 @@ public class CustomerController {
      * @return updated customer
      */
     @Operation(summary = "Update a customer in the current tenant")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('customer:write')")
+    @Audit(action = "CUSTOMER_UPDATE", resource = "CUSTOMER")
     @PutMapping("/{id}")
     public Result<CustomerVO> update(@PathVariable Long id, @Valid @RequestBody CustomerUpdateRequest request) {
         return Result.success(customerService.update(id, request));
@@ -101,7 +104,8 @@ public class CustomerController {
      * @return empty success envelope
      */
     @Operation(summary = "Delete a customer from the current tenant")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'TENANT_ADMIN')")
+    @PreAuthorize("hasAuthority('customer:write')")
+    @Audit(action = "CUSTOMER_DELETE", resource = "CUSTOMER")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         customerService.delete(id);

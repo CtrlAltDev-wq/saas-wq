@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Subscriptions", description = "Tenant subscription entitlement")
 @RestController
 @RequestMapping("/api/subscriptions")
-@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'TENANT_ADMIN', 'MEMBER')")
+@PreAuthorize("hasAuthority('subscription:read')")
 @RequiredArgsConstructor
 public class SubscriptionController {
 

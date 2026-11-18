@@ -2,6 +2,7 @@ package com.wq.server.controller;
 
 import com.wq.common.api.PageResult;
 import com.wq.common.api.Result;
+import com.wq.framework.audit.Audit;
 import com.wq.server.dto.UserCreateRequest;
 import com.wq.server.dto.UserUpdateRequest;
 import com.wq.server.service.UserService;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/users")
-@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'TENANT_ADMIN')")
+@PreAuthorize("hasAuthority('user:read')")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -74,6 +75,8 @@ public class UserController {
      * @return created user
      */
     @Operation(summary = "Create a user in the current tenant")
+    @PreAuthorize("hasAuthority('user:write')")
+    @Audit(action = "USER_CREATE", resource = "USER")
     @PostMapping
     public Result<UserVO> create(@Valid @RequestBody UserCreateRequest request) {
         return Result.success(userService.create(request));
@@ -87,6 +90,8 @@ public class UserController {
      * @return updated user
      */
     @Operation(summary = "Update a user in the current tenant")
+    @PreAuthorize("hasAuthority('user:write')")
+    @Audit(action = "USER_UPDATE", resource = "USER")
     @PutMapping("/{id}")
     public Result<UserVO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest request) {
         return Result.success(userService.update(id, request));
@@ -99,6 +104,8 @@ public class UserController {
      * @return empty success envelope
      */
     @Operation(summary = "Delete a user from the current tenant")
+    @PreAuthorize("hasAuthority('user:write')")
+    @Audit(action = "USER_DELETE", resource = "USER")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         userService.delete(id);

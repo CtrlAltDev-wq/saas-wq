@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wq.common.api.Result;
 import com.wq.common.api.ResultCode;
 import com.wq.framework.tenant.TenantContext;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -33,6 +34,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private final ObjectMapper objectMapper;
 
+    private final MeterRegistry meterRegistry;
+
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                              @NonNull Object handler) throws IOException {
@@ -50,6 +53,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         if (result.allowed()) {
             return true;
         }
+        meterRegistry.counter("saaswq.rate.limit.rejected", "tenant", String.valueOf(tenantId)).increment();
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(result.retryAfter()));
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
