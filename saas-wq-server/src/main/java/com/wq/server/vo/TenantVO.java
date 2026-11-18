@@ -12,11 +12,13 @@ import java.time.LocalDateTime;
  * @param name         display name
  * @param contactEmail administrator contact mailbox
  * @param status       ACTIVE or DISABLED
+ * @param planCode     current subscription plan code
+ * @param planExpiresAt current subscription expiry
  * @param createdAt    creation time
  */
 @Schema(description = "Tenant profile")
-public record TenantVO(Long id, String code, String name, String contactEmail, String status,
-                       LocalDateTime createdAt) {
+public record TenantVO(Long id, String code, String name, String contactEmail, String status, String planCode,
+                       LocalDateTime planExpiresAt, LocalDateTime createdAt) {
 
     /**
      * Maps a persistence entity to its API representation.
@@ -26,6 +28,6 @@ public record TenantVO(Long id, String code, String name, String contactEmail, S
      */
     public static TenantVO from(Tenant tenant) {
         return new TenantVO(tenant.getId(), tenant.getCode(), tenant.getName(), tenant.getContactEmail(),
-                tenant.getStatus(), tenant.getCreatedAt());
+                tenant.getStatus(), tenant.getPlanCode(), tenant.getPlanExpiresAt(), tenant.getCreatedAt());
     }
 }

@@ -31,4 +31,14 @@ public class Tenant extends BaseEntity {
      * {@link com.wq.server.enums.TenantStatus} value.
      */
     private String status;
+
+    /**
+     * Current subscription plan code, granted by the billing module.
+     */
+    private String planCode;
+
+    /**
+     * Current subscription expiry, granted by the billing module.
+     */
+    private java.time.LocalDateTime planExpiresAt;
 }

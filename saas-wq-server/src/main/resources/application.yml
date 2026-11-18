@@ -4,7 +4,7 @@ server:
 
 spring:
   application:
-    name: saas-wq
+    name: saas-wq-server
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
@@ -58,6 +58,33 @@ wq:
       secret: ${JWT_SECRET:saas-wq-local-development-secret-key-change-me}
       expiration: ${JWT_EXPIRATION:PT12H}
       issuer: saas-wq
+  rate-limit:
+    # Tenant based fixed window quota enforced on every /api/** request.
+    # When disabled, or when Redis is unreachable, requests are allowed through.
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:60}
+    key-prefix: ${RATE_LIMIT_KEY_PREFIX:saas-wq:rate-limit:}
+  stripe:
+    # Leave the keys empty to start the service without a payment provider.
+    # Checkout returns 503 and webhooks are rejected until they are configured.
+    secret-key: ${STRIPE_SECRET_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    success-url: "${STRIPE_SUCCESS_URL:http://localhost:5173/billing/success?session_id={CHECKOUT_SESSION_ID}}"
+    cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/billing/cancel}
+    currency: ${STRIPE_CURRENCY:usd}
+    plans:
+      STARTER:
+        name: Starter
+        amount-cents: 2900
+        interval: month
+      PROFESSIONAL:
+        name: Professional
+        amount-cents: 9900
+        interval: month
+      ENTERPRISE:
+        name: Enterprise
+        amount-cents: 29900
+        interval: month
 
 logging:
   level:

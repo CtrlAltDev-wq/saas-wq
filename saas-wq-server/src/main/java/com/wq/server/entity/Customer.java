@@ -38,6 +38,11 @@ public class Customer extends BaseEntity {
     private String phone;
 
     /**
+     * Stripe customer identifier bound on the first checkout, managed by the payment module.
+     */
+    private String stripeCustomerId;
+
+    /**
      * Account status, for example ACTIVE or INACTIVE.
      */
     private String status;
