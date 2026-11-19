@@ -1,6 +1,7 @@
 # saas-wq
 
 **A production-grade, multi-tenant SaaS platform reference implementation.**
+[![CI](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml/badge.svg)](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml)
 
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-6DB33F?logo=springboot&logoColor=white)
@@ -8,7 +9,6 @@
 ![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vue.js&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)
-[![CI](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml/badge.svg)](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml)
 ![Tests](https://img.shields.io/badge/tests-37%20passing-brightgreen)
 ![Docker](https://img.shields.io/badge/docker%20compose-ready-2496ED?logo=docker&logoColor=white)
 
