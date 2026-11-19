@@ -746,4 +746,4 @@ Natural next steps for a commercial deployment:
 
 ---
 
-Maintained by **wangqi**.
+Maintained by **Qi Wang**.
