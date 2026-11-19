@@ -3,8 +3,8 @@
 **A production-grade, multi-tenant SaaS platform reference implementation.**
 
 [![CI](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml/badge.svg)](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-37%20passing-brightgreen)
-![Docker](https://img.shields.io/badge/docker%20compose-ready-2496ED?logo=docker&logoColor=white)
+[![Tests](https://img.shields.io/badge/tests-37%20passing-brightgreen)](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml)
+[![Docker](https://img.shields.io/badge/docker%20compose-ready-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
 
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-6DB33F?logo=springboot&logoColor=white)
