@@ -8,7 +8,7 @@
 ![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vue.js&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)
-![CI](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml/badge.svg)](https://github.com/CtrlAltDev-wq/saas-wq/actions/workflows/ci.yml)
 ![Tests](https://img.shields.io/badge/tests-37%20passing-brightgreen)
 ![Docker](https://img.shields.io/badge/docker%20compose-ready-2496ED?logo=docker&logoColor=white)
 
