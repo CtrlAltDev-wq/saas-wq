@@ -229,7 +229,7 @@ saas-wq/
 ### One command startup
 
 ```bash
-git clone https://github.com/your-org/saas-wq.git
+git clone https://github.com/CtrlAltDev-wq/saas-wq.git
 cd saas-wq
 cp .env.example .env
 docker compose up --build
