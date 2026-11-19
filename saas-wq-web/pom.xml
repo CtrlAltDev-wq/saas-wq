@@ -13,5 +13,5 @@
     <artifactId>saas-wq-web</artifactId>
     <packaging>pom</packaging>
     <name>saas-wq-web</name>
-    <description>Reserved module for the Vue 3 + Vite administration console (iteration 2)</description>
+    <description>Vue 3 + Vite administration console (built with npm, kept in the reactor for layout)</description>
 </project>
