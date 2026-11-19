@@ -19,29 +19,31 @@ jobs:
     name: Backend (Java 17)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
           cache: maven
 
       - name: Run unit and integration tests
-        run: mvn -B -ntp -pl saas-wq-server -am verify
+        # The hosted runner ships a Docker engine that rejects API versions
+        # older than 1.40, while docker-java still defaults to 1.32.
+        run: mvn -B -ntp -pl saas-wq-server -am verify -Dapi.version=1.44
 
   frontend:
-    name: Frontend (Node 20)
+    name: Frontend (Node 22)
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: saas-wq-web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: saas-wq-web/package-lock.json
 
