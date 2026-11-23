@@ -1,33 +1,53 @@
 version: 2
 
+# Kept intentionally quiet: a portfolio repository should not be buried under
+# dependency pull requests. Major upgrades are ignored because they break the
+# build and need a manual migration, not a bot.
 updates:
   - package-ecosystem: maven
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 2
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
     groups:
-      spring:
+      backend:
         patterns:
-          - "org.springframework*"
-      testcontainers:
-        patterns:
-          - "org.testcontainers*"
+          - "*"
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: npm
     directory: /saas-wq-web
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 2
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
     groups:
-      vue:
+      frontend:
         patterns:
-          - "vue*"
-          - "@vue/*"
-          - "vue-router"
-          - "pinia"
+          - "*"
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
+    groups:
+      actions:
+        patterns:
+          - "*"
