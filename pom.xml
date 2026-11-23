@@ -33,7 +33,7 @@
         <mybatis-plus.version>3.5.9</mybatis-plus.version>
         <jjwt.version>0.12.6</jjwt.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <stripe.version>28.4.0</stripe.version>
+        <stripe.version>34.2.0</stripe.version>
     </properties>
 
     <dependencyManagement>
