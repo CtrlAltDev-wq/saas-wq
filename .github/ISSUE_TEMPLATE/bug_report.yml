@@ -1,0 +1,54 @@
+name: Bug report
+description: Report a reproducible defect in the backend or the console
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please avoid pasting secrets, tokens or production data.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: A clear description of the defect and the expected behaviour.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Sign in as acme.admin
+        2. Open Customers
+        3. Create a customer with ...
+        4. Observe ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Authentication and JWT
+        - RBAC and permissions
+        - Audit trail
+        - Tenant isolation
+        - Rate limiting
+        - Billing and Stripe webhooks
+        - Observability
+        - Console UI
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      placeholder: e.g. 22865fc
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or response body
+      description: Paste the unified Result envelope, stack trace or browser console output.
+      render: shell

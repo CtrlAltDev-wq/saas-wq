@@ -12,7 +12,7 @@
 ![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vue.js&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)
-
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 `saas-wq` is a complete multi-tenant SaaS starter: a Spring Boot 3 backend, a Vue 3 administration console, MySQL and Redis infrastructure, Stripe subscription billing with signed webhooks, role based access control with a tenant scoped audit trail, and first class observability. Everything ships in containers and starts with a single command.
 
@@ -25,6 +25,7 @@ Maintained by **Qi Wang**.
 ## Table of contents
 
 - [Why this project](#why-this-project)
+- [Engineering highlights](#engineering-highlights)
 - [Screenshots](#screenshots)
 - [Architecture](#architecture)
   - [Request lifecycle](#request-lifecycle)
@@ -75,6 +76,31 @@ Most SaaS examples stop at CRUD. This one models the concerns that decide whethe
 
 ---
 
+## Engineering highlights
+
+The interesting work is not the CRUD screens, it is the decisions behind them. Each item below is a problem that breaks naive multi-tenant implementations, and the solution that ships here.
+
+| Hard problem | Naive approach and why it fails | What this project does |
+| --- | --- | --- |
+| Tenant isolation | Filter by tenant in every service method; one forgotten `WHERE` leaks customer data | MyBatis-Plus rewrites every statement on tenant scoped tables with `tenant_id = ?`, including inserts, updates and logical deletes. Global tables are whitelisted in `TenantConstants`, so isolation cannot be forgotten |
+| Permission changes | Put permissions in the JWT; revoking a permission requires the user to sign in again | The token carries the role, the permission set is resolved per request through `PermissionService` and cached in Redis. Changing a role evicts the entry, so revocation applies on the next request |
+| Webhook idempotency | Trust the provider to deliver once; a retry double charges or double extends a subscription | The event id is claimed in Redis for seven days, and every handler performs a status guarded update. A replay returns `duplicate: true` without touching the database |
+| Rate limiting fairness | Count requests per IP; one noisy integration or NAT starves other customers | A single Lua script increments the counter of the tenant for the current minute, so the quota belongs to the paying tenant. Redis outages fail open and are counted instead of taking the API down |
+| Audit safety | Persist the audit row inside the business transaction; an audit failure rolls back a legitimate write | The aspect runs around the call, records success and failure, and swallows persistence failures. Arguments are masked (`password`, `secret`, `token`) before storage |
+| Confidence in CI | Mock the database and test nothing that matters | Integration tests start real MySQL 8 and Redis 7 containers through Testcontainers, on a hosted runner, on every push |
+
+### Architecture decisions
+
+| Decision | Alternative rejected | Reason |
+| --- | --- | --- |
+| Shared schema with a tenant line interceptor | Database per tenant | One migration path and one connection pool, while isolation stays enforced in SQL rather than in application code |
+| `saas-wq-common` envelope mapped to real HTTP status codes | Always return `200` and read `code` in the client | Proxies, monitors and clients can react to `401 / 403 / 429` without parsing the body |
+| Framework SPI (`PermissionLookup`) implemented by the server | Framework module depends on the RBAC tables | Security wiring stays reusable and the dependency direction points inward |
+| Redis Lua fixed window | Token bucket in application memory | Atomic across instances, no clock drift between nodes, and a single round trip per request |
+| RabbitMQ style outbox | Direct calls from the controller to Stripe | Not added: the order is persisted as `PENDING` first, so a failed Checkout session leaves a recoverable record |
+
+---
+
 ## Screenshots
 
 | Sign in | Dashboard |
@@ -89,9 +115,20 @@ Most SaaS examples stop at CRUD. This one models the concerns that decide whethe
 | --- | --- |
 | ![Users](assets/screenshots/users.png) | ![Tenants](assets/screenshots/tenants.png) |
 
+| Roles and permissions | Audit trail |
+| --- | --- |
+| ![Roles and permissions](assets/screenshots/rbac.png) | ![Audit trail](assets/screenshots/audit-logs.png) |
+
 | OpenAPI console (`/swagger-ui.html`) |
 | --- |
 | ![Swagger UI](assets/screenshots/swagger.png) |
+
+### Demo walkthrough
+
+![Walkthrough](assets/demo.gif)
+
+A single take recorded against the local stack: sign in as `acme.admin`, create a customer, watch the
+audit entry appear, then switch to `superadmin` and revoke a permission from the `MEMBER` role.
 
 ---
 
@@ -509,6 +546,13 @@ curl -s -X PUT http://localhost:8080/api/rbac/roles/MEMBER/permissions \
 
 `SUPER_ADMIN` cannot be downgraded: the call returns `409 Conflict`. Unknown permission codes return `400`.
 
+The console exposes the same capability in **Roles & permissions**: every role lists its granted
+codes, and the editor groups them by resource. Editing is limited to `SUPER_ADMIN`; other
+administrators see a read-only view. A saved change is visible on the next request because the Redis
+entry of the role is evicted.
+
+![Role permission editor](assets/screenshots/rbac-editor.png)
+
 ### Metrics
 
 ```bash
@@ -614,6 +658,11 @@ public Result<CustomerVO> create(@Valid @RequestBody CustomerCreateRequest reque
 
 Recorded fields: tenant, actor id and username, action, resource, HTTP method, URI, sanitised arguments (truncated to 2 000 characters), success flag, error message, duration in milliseconds, client IP and timestamp. Fields whose name contains `password`, `secret` or `token` are replaced with `***`. Persistence failures are logged and swallowed, so auditing can never break a business call, and requests without a tenant binding are skipped.
 
+Operators read the trail from the console (**Audit trail**): filter by action, username or outcome,
+expand a row to inspect the sanitised payload, and page through up to 50 entries at a time.
+
+![Audit trail detail](assets/screenshots/audit-detail.png)
+
 ---
 
 ## Observability
@@ -673,6 +722,10 @@ mvn -pl saas-wq-server -am test -Dapi.version=1.44
 ```
 
 Current status: **37 tests, 0 failures**.
+
+The GitHub Actions pipeline (`.github/workflows/ci.yml`) runs this suite on every push and pull
+request against `main`, then type checks and builds the console with Node 22. The `CI` badge at the
+top reflects the latest run.
 
 ---
 
@@ -738,15 +791,11 @@ Flyway creates the schema and inserts the demo data automatically on first start
 
 ## Roadmap
 
-Iteration 1 delivered the platform foundation; iteration 2 added subscription billing and webhook driven entitlement; iteration 3 added the Vue 3 console; iteration 4 added tenant rate limiting and containerised delivery; iteration 5 added the automated test suite, RBAC with audit logging and full observability.
+Iteration 1 delivered the platform foundation; iteration 2 added subscription billing and webhook driven entitlement; iteration 3 added the Vue 3 console; iteration 4 added tenant rate limiting and containerised delivery; iteration 5 added the automated test suite, RBAC with audit logging and full observability; iteration 6 added the roles and audit screens in the console plus the GitHub Actions pipeline.
 
 Natural next steps for a commercial deployment:
 
 - SSO (OIDC / SAML) per tenant alongside password authentication
-- An audit trail viewer in the console and export to cold storage
+- Audit export to cold storage and a retention policy
 - Alert rules and dashboards for the `saaswq_*` metrics
 - Email notifications for dunning and plan changes
-
----
-
-Maintained by **Qi Wang**.

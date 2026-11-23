@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a capability or an improvement
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which workflow is painful today, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behaviour you expect, including the API or UI surface it touches.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Authentication and SSO
+        - RBAC and permissions
+        - Audit trail
+        - Tenant life cycle
+        - Billing and Stripe
+        - Observability
+        - Console UI
+        - Developer experience
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing workarounds or designs you evaluated.

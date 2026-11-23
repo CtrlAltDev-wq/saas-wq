@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      spring:
+        patterns:
+          - "org.springframework*"
+      testcontainers:
+        patterns:
+          - "org.testcontainers*"
+
+  - package-ecosystem: npm
+    directory: /saas-wq-web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      vue:
+        patterns:
+          - "vue*"
+          - "@vue/*"
+          - "vue-router"
+          - "pinia"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
