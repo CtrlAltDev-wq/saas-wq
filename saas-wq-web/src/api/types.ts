@@ -161,3 +161,42 @@ export interface CheckoutPayload {
   customerId: number
   planCode: string
 }
+
+export interface RoleDefinition {
+  code: Role
+  name: string
+  description: string | null
+  builtIn: boolean
+  permissions: string[]
+}
+
+export interface PermissionDefinition {
+  code: string
+  name: string
+  resource: string
+  action: string
+  description: string | null
+}
+
+export interface AuditLog {
+  id: number
+  tenantId: number
+  userId: number | null
+  username: string | null
+  action: string
+  resource: string
+  httpMethod: string
+  uri: string
+  requestArgs: string | null
+  success: boolean
+  errorMessage: string | null
+  durationMs: number | null
+  ipAddress: string | null
+  createdAt: string
+}
+
+export interface AuditLogQuery {
+  action?: string
+  username?: string
+  success?: boolean
+}

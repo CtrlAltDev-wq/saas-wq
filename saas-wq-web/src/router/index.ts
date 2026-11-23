@@ -66,6 +66,28 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'rbac',
+        name: 'rbac',
+        component: () => import('@/views/rbac/RbacView.vue'),
+        meta: {
+          title: 'Roles & permissions',
+          icon: 'Lock',
+          group: 'Administration',
+          roles: ['SUPER_ADMIN', 'TENANT_ADMIN']
+        }
+      },
+      {
+        path: 'audit-logs',
+        name: 'audit-logs',
+        component: () => import('@/views/audit/AuditLogView.vue'),
+        meta: {
+          title: 'Audit trail',
+          icon: 'Document',
+          group: 'Administration',
+          roles: ['SUPER_ADMIN', 'TENANT_ADMIN']
+        }
+      },
+      {
         path: 'billing/success',
         name: 'billing-success',
         component: () => import('@/views/billing/BillingSuccessView.vue'),

@@ -31,6 +31,20 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'User',
     group: 'Administration',
     roles: ['SUPER_ADMIN', 'TENANT_ADMIN']
+  },
+  {
+    path: '/rbac',
+    title: 'Roles & permissions',
+    icon: 'Lock',
+    group: 'Administration',
+    roles: ['SUPER_ADMIN', 'TENANT_ADMIN']
+  },
+  {
+    path: '/audit-logs',
+    title: 'Audit trail',
+    icon: 'Document',
+    group: 'Administration',
+    roles: ['SUPER_ADMIN', 'TENANT_ADMIN']
   }
 ]
 
